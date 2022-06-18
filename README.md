@@ -16,4 +16,4 @@ gofixit ./...
 
 ## Configuration
 
-TODO: missing still
+// TODO[2022-06-20]: missing still

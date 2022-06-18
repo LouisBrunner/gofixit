@@ -11,16 +11,12 @@ import (
 )
 
 type fprocessor[T any] struct {
-	processor      contracts.FileProcessor[T]
-	recursive      bool
-	fallbackGoList bool
+	contracts.FilesProcessorConfig[T]
 }
 
 func New[T any](config contracts.FilesProcessorConfig[T]) (contracts.FilesProcessor[T], error) {
 	return &fprocessor[T]{
-		processor:      config.Processor,
-		recursive:      config.Recursive,
-		fallbackGoList: config.FallbackGoList,
+		FilesProcessorConfig: config,
 	}, nil
 }
 
@@ -41,12 +37,12 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 			info, err := os.Stat(filename)
 			if err == nil {
 				if !info.IsDir() {
-					result, err := me.processor(filename)
+					result, err := me.Processor(filename)
 					if err != nil {
 						return nil, fmt.Errorf("failed to process %s: %w", filename, err)
 					}
 					results[filename] = result
-				} else if me.recursive {
+				} else if me.Recursive {
 					files, err := os.ReadDir(filename)
 					if err != nil {
 						return nil, fmt.Errorf("failed to list %s: %w", filename, err)
@@ -62,7 +58,7 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 				continue
 			}
 
-			if !me.fallbackGoList {
+			if !me.FallbackGoList {
 				return nil, fmt.Errorf("no such file %s: %w", filename, err)
 			}
 

@@ -16,6 +16,7 @@ type ParsingConfig struct {
 	Prefixes        []string
 	ExpiryPattern   string
 	CaseSensitive   bool
+	DateLayout      string
 }
 
 type Parser interface {

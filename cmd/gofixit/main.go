@@ -15,6 +15,7 @@ type args struct {
 	prefixes        []string
 	caseSensitive   bool
 	expiryPattern   string
+	dateLayout      string
 	strict          bool
 	recursive       bool
 	filesPattern    []string
@@ -32,11 +33,15 @@ func main() {
 }
 
 func work() (bool, error) {
+	// TODO[2022-06-26]: read from CLI/env/files
 	params := args{
 		commentPrefixes: []string{"//", "#", "/*"},
 		prefixes:        []string{"TODO", "FIXME"},
-		expiryPattern:   "{{.Prefix}}[{{.Date}}]",
-		filesPattern:    []string{"./..."},
+		expiryPattern:   "{{.Prefix}}([{{.Date}}])?",
+		filesPattern:    []string{"src"}, // TODO[2022-06-19]: wrong default
+		// filesPattern:    []string{"."},
+		recursive:  true,
+		dateLayout: "2006-01-02",
 	}
 
 	parser, err := gofixit.NewParser(contracts.ParsingConfig{
@@ -44,6 +49,7 @@ func work() (bool, error) {
 		Prefixes:        params.prefixes,
 		ExpiryPattern:   params.expiryPattern,
 		CaseSensitive:   params.caseSensitive,
+		DateLayout:      params.dateLayout,
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed while creating parser (%w)", err)
@@ -57,6 +63,7 @@ func work() (bool, error) {
 	}
 
 	glue := func(filepath string) ([]contracts.ParsedComment, error) {
+		// FIXME: should really be streaming files better than this
 		content, err := ioutil.ReadFile(filepath)
 		if err != nil {
 			return nil, err
@@ -77,6 +84,8 @@ func work() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed while parsing files (%w)", err)
 	}
+
+	fmt.Printf("%+v\n", parsed)
 
 	hadError := false
 	for _, entry := range utils.SortedMap(parsed) {
