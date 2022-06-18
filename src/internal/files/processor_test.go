@@ -37,8 +37,8 @@ func Test_ProcessFiles_echo(t *testing.T) {
 				"testdata/sub/file2.c",
 			},
 			want: map[string]string{
-				filepath.Join(pwd, "testdata/file.c"):      filepath.Join(pwd, "testdata/file.c"),
-				filepath.Join(pwd, "testdata/sub/file2.c"): filepath.Join(pwd, "testdata/sub/file2.c"),
+				"testdata/file.c":      "testdata/file.c",
+				"testdata/sub/file2.c": "testdata/sub/file2.c",
 			},
 		},
 		{
@@ -52,8 +52,8 @@ func Test_ProcessFiles_echo(t *testing.T) {
 				"testdata/sub",
 			},
 			want: map[string]string{
-				filepath.Join(pwd, "testdata/file.c"):      filepath.Join(pwd, "testdata/file.c"),
-				filepath.Join(pwd, "testdata/sub/file2.c"): filepath.Join(pwd, "testdata/sub/file2.c"),
+				"testdata/file.c":      "testdata/file.c",
+				"testdata/sub/file2.c": "testdata/sub/file2.c",
 			},
 		},
 		{
@@ -97,7 +97,7 @@ func Test_ProcessFiles_echo(t *testing.T) {
 				filepath.Join(pwd, "testdata/file.c"),
 			},
 			want: map[string]string{
-				filepath.Join(pwd, "testdata/file.c"): filepath.Join(pwd, "testdata/file.c"),
+				"testdata/file.c": "testdata/file.c",
 			},
 		},
 		{

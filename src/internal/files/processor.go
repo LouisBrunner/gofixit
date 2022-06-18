@@ -22,15 +22,16 @@ func New[T any](config contracts.FilesProcessorConfig[T]) (contracts.FilesProces
 
 func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 	results := make(map[string]T, len(files))
+	absMatches := make(map[string]struct{}, len(files))
 
 	extras := []string{}
 	for len(files) > 0 {
 		for _, filename := range files {
-			filename, err := filepath.Abs(filename)
+			absFilename, err := filepath.Abs(filename)
 			if err != nil {
 				return nil, fmt.Errorf("failed to generate absolute path for %s: %w", filename, err)
 			}
-			if _, found := results[filename]; found {
+			if _, found := absMatches[absFilename]; found {
 				continue
 			}
 
@@ -42,6 +43,7 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 						return nil, fmt.Errorf("failed to process %s: %w", filename, err)
 					}
 					results[filename] = result
+					absMatches[absFilename] = struct{}{}
 				} else if me.Recursive {
 					files, err := os.ReadDir(filename)
 					if err != nil {

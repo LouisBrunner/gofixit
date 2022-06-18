@@ -87,11 +87,12 @@ func (me *parserImpl) Parse(fileContent string) ([]contracts.ParsedComment, erro
 		if len(matches) < expectedMatches {
 			continue
 		}
+		// TODO: add logging
 		var expiry *time.Time
 		if matches[matchExpiry] != "" {
 			expiryValue, err := time.Parse(me.DateLayout, matches[matchExpiry])
 			if err != nil {
-				// TODO: add logging?
+				// TODO: add logging
 				continue
 			}
 			expiry = &expiryValue

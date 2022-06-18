@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	gofixit "github.com/LouisBrunner/gofixit/src"
 	"github.com/LouisBrunner/gofixit/src/contracts"
@@ -33,15 +34,14 @@ func main() {
 }
 
 func work() (bool, error) {
-	// TODO[2022-06-26]: read from CLI/env/files
+	// TODO[2022-06-10]: read from CLI/env/files
 	params := args{
 		commentPrefixes: []string{"//", "#", "/*"},
 		prefixes:        []string{"TODO", "FIXME"},
-		expiryPattern:   "{{.Prefix}}([{{.Date}}])?",
-		filesPattern:    []string{"src"}, // TODO[2022-06-19]: wrong default
-		// filesPattern:    []string{"."},
-		recursive:  true,
-		dateLayout: "2006-01-02",
+		expiryPattern:   "{{.Prefix}}(?:\\[({{.Date}})\\])?",
+		filesPattern:    []string{"."},
+		recursive:       true,
+		dateLayout:      "2006-01-02",
 	}
 
 	parser, err := gofixit.NewParser(contracts.ParsingConfig{
@@ -57,6 +57,7 @@ func work() (bool, error) {
 
 	enforcer, err := gofixit.NewEnforcer(contracts.EnforcerConfig{
 		Strict: params.strict,
+		Now:    time.Now(),
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed while creating enforcer (%w)", err)
@@ -84,8 +85,6 @@ func work() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed while parsing files (%w)", err)
 	}
-
-	fmt.Printf("%+v\n", parsed)
 
 	hadError := false
 	for _, entry := range utils.SortedMap(parsed) {
