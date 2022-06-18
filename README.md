@@ -1,2 +1,19 @@
 # gofixit
-A go linter which sets a timer on all your TODOs and FIXMEs and ensure they are dealt in time
+
+A go linter which sets a timer on all your TODOs and FIXMEs and ensure they are dealt in time.
+
+## Installation
+
+```
+go install github.com/LouisBrunner/gofixit@latest
+```
+
+## Usage
+
+```
+gofixit ./...
+```
+
+## Configuration
+
+TODO: missing still
