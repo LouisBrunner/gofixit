@@ -25,10 +25,10 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 		},
 		{
@@ -39,10 +39,10 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 			wantErr: true,
 		},
@@ -53,11 +53,11 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				Expiry:        utils.Pointerize(now.Add(time.Hour)),
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 		},
 		{
@@ -67,11 +67,11 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				Expiry:        utils.Pointerize(now.Add(time.Hour)),
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 		},
 		{
@@ -82,11 +82,11 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				Expiry:        utils.Pointerize(now.Add(-time.Hour)),
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 			wantErr: true,
 		},
@@ -98,11 +98,11 @@ func Test_Check(t *testing.T) {
 			},
 			comment: contracts.ParsedComment{
 				CommentPrefix: "//",
-				Prefix:        "TODO",
+				Prefix:        "fixit",
 				Content:       "implement",
 				Expiry:        utils.Pointerize(now.Add(-time.Hour)),
 				LineNumber:    5,
-				OriginalLine:  "", // leaving blank so it doesn't get picked up by our own tool
+				OriginalLine:  "// fixit: implement",
 			},
 			wantErr: true,
 		},
@@ -114,8 +114,9 @@ func Test_Check(t *testing.T) {
 				t.Fatalf("failed to create enforcer: %v", err)
 			}
 
-			if err := me.Check(tt.comment); (err != nil) != tt.wantErr {
-				t.Errorf("enforcer.Check() error = %v, wantErr %v", err, tt.wantErr)
+			err = me.Check(tt.comment)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

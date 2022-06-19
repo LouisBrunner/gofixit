@@ -12,21 +12,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func layoutToRegex(layout string) string {
+func layoutToRegex(layout string) (string, error) {
 	matcherBuilder := &strings.Builder{}
 	for _, c := range layout {
 		// TODO[2022-08-10]: don't support layout with anything but digits and separators
 		if unicode.IsDigit(c) {
 			matcherBuilder.WriteString("[[:digit:]]")
+		} else if unicode.IsLetter(c) {
+			return "", fmt.Errorf("unsupported character %q in the date layout", c)
 		} else {
 			matcherBuilder.WriteString(regexp.QuoteMeta(string(c)))
 		}
 	}
-	return matcherBuilder.String()
+	return matcherBuilder.String(), nil
 }
 
 const (
-	matchComment = iota + 1
+	matchEverything = iota + 1
+	matchComment
 	matchPrefix
 	matchExpiry
 	matchContent
@@ -34,18 +37,20 @@ const (
 )
 
 type ordering struct {
-	matchComment int
-	matchPrefix  int
-	matchExpiry  int
-	matchContent int
+	matchEverything int
+	matchComment    int
+	matchPrefix     int
+	matchExpiry     int
+	matchContent    int
 }
 
 func buildRE(logger *logrus.Logger, config contracts.ParsingConfig) (*regexp.Regexp, *ordering, error) {
 	order := ordering{
-		matchComment: matchComment,
-		matchPrefix:  matchPrefix,
-		matchExpiry:  matchExpiry,
-		matchContent: matchContent,
+		matchEverything: matchEverything,
+		matchComment:    matchComment,
+		matchPrefix:     matchPrefix,
+		matchExpiry:     matchExpiry,
+		matchContent:    matchContent,
 	}
 
 	idxPrefix := strings.Index(config.ExpiryPattern, ".Prefix")
@@ -66,17 +71,31 @@ func buildRE(logger *logrus.Logger, config contracts.ParsingConfig) (*regexp.Reg
 		return nil, nil, err
 	}
 
+	dateRegex, err := layoutToRegex(config.DateLayout)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	patternBuilder := &strings.Builder{}
-	tmpl.Execute(patternBuilder, struct {
+	err = tmpl.Execute(patternBuilder, struct {
 		Prefix string
 		Date   string
 	}{
 		Prefix: fmt.Sprintf("(%s)", strings.Join(utils.MapSlice(config.Prefixes, regexp.QuoteMeta), "|")),
-		Date:   layoutToRegex(config.DateLayout),
+		Date:   fmt.Sprintf("((?:%s)?)", dateRegex),
 	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	flags := "(?i)"
+	if config.CaseSensitive {
+		flags = "(?)"
+	}
 
 	literal := fmt.Sprintf(
-		"(%s)[[:space:]]*%s[[:space:]]*(.+)?$",
+		"%s((%s)[[:space:]]*%s[[:space:]]*(.+)?)$",
+		flags,
 		strings.Join(utils.MapSlice(config.CommentPrefixes, regexp.QuoteMeta), "|"),
 		patternBuilder.String(),
 	)

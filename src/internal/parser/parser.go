@@ -41,6 +41,7 @@ func (me *parserImpl) Parse(fileContent string) ([]contracts.ParsedComment, erro
 	for num, line := range lines {
 		me.logger.Debugf("parsing line %q", line)
 		matches := me.re.FindStringSubmatch(line)
+		me.logger.Debugf("found matches %+v", matches)
 		if len(matches) < expectedMatches {
 			continue
 		}
@@ -60,7 +61,7 @@ func (me *parserImpl) Parse(fileContent string) ([]contracts.ParsedComment, erro
 			Content:       matches[me.order.matchContent],
 			Expiry:        expiry,
 			LineNumber:    uint(num) + 1,
-			OriginalLine:  strings.TrimSpace(line),
+			OriginalLine:  matches[me.order.matchEverything],
 		})
 	}
 	return results, nil

@@ -40,7 +40,7 @@ func work() (bool, error) {
 	params := args{
 		commentPrefixes: []string{"//", "#", "/*"},
 		prefixes:        []string{"TODO", "FIXME"},
-		expiryPattern:   "{{.Prefix}}(?:\\[({{.Date}})\\])?",
+		expiryPattern:   "{{.Prefix}}(?:\\[{{.Date}}\\])?",
 		filesPattern:    []string{"."},
 		recursive:       true,
 		dateLayout:      "2006-01-02",
