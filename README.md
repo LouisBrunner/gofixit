@@ -1,6 +1,31 @@
 # `gofixit`
 
-A go linter which sets a timer on all your TODOs and FIXMEs and ensure they are dealt in time.
+You work on a new task, encounter a difficult problem or something you don't want to implement yet, you drop a `TODO` and move on, then some time later production break because you forgot about it... has this ever happened to you?
+
+`gofixit` is a language-agnostic linter which enforces that your TODOs and FIXMEs are dealt with in time, very similar to [this eslint plugin](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/expiring-todo-comments.md).
+
+## Example
+
+File (`examples/example1.c`):
+```c
+#include <stdio.h>
+
+void doSomething() {
+  // TODO[2022-06-15]: implement later
+  assert(("unimplemented", 0));
+}
+
+
+int main() {
+  doSomething()
+}
+```
+
+Result (with `gofixit --files examples/example1.c --strict` as of 2022-06-19):
+```
+examples/example1.c:4 TODO now overdue for 4 days 13 hours
+examples/example1.c:12 FIXME missing expiry date
+```
 
 ## Installation
 
@@ -39,6 +64,7 @@ Settings:
  * `Strict`: will force all matched comments to have an expiry date
  * `Recursive`: will process directories recursively (default `true`)
  * `Files`: list of files to parse (default `[.]`)
+ * `FilesExcludePatterns`: list of patterns used to exclude files or directories
  * `LoggingLevel`: logrus log level for internal debugging (default `"fatal"`)
 
 Example:

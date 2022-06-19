@@ -12,15 +12,16 @@ import (
 )
 
 type args struct {
-	commentPrefixes []string
-	prefixes        []string
-	caseInsensitive bool
-	expiryPattern   string
-	dateLayout      string
-	strict          bool
-	recursive       bool
-	filesPattern    []string
-	loggingLevel    logrus.Level
+	commentPrefixes     []string
+	prefixes            []string
+	caseInsensitive     bool
+	expiryPattern       string
+	dateLayout          string
+	strict              bool
+	recursive           bool
+	files               []string
+	filesExcludePattern []string
+	loggingLevel        logrus.Level
 }
 
 func addAllParentFoldersUntilRoot() error {
@@ -54,6 +55,7 @@ func getArgs() (*args, error) {
 	addDefault([]string{"Prefixes"}, []string{"TODO", "FIXME"}, pflag.StringSlice, "strings which define what a TODO looks like")
 	addDefault([]string{"Expiry", "Pattern"}, "{{.Prefix}}(?:\\[{{.Date}}\\])?", pflag.String, "Go template used to generate a regex to match the prefix and expiry date together, careful of escaping any regex character in here")
 	addDefault([]string{"Files"}, []string{"."}, pflag.StringSlice, "list of files to parse")
+	addDefault([]string{"Files", "Exclude", "Patterns"}, []string{""}, pflag.StringSlice, "list of patterns used to exclude files or directories")
 	addDefault([]string{"Recursive"}, true, pflag.Bool, "will process directories recursively")
 	addDefault([]string{"Strict"}, false, pflag.Bool, "will force all matched comments to have an expiry date")
 	addDefault([]string{"Date", "Layout"}, "2006-01-02", pflag.String, "date layout format, as specified by Golang's date parsing")
@@ -87,14 +89,15 @@ func getArgs() (*args, error) {
 	}
 
 	return &args{
-		commentPrefixes: viper.GetStringSlice("CommentPrefixes"),
-		prefixes:        viper.GetStringSlice("Prefixes"),
-		caseInsensitive: viper.GetBool("CaseSensitive"),
-		expiryPattern:   viper.GetString("ExpiryPattern"),
-		dateLayout:      viper.GetString("DateLayout"),
-		strict:          viper.GetBool("Strict"),
-		recursive:       viper.GetBool("Recursive"),
-		filesPattern:    viper.GetStringSlice("Files"),
-		loggingLevel:    logLevel,
+		commentPrefixes:     viper.GetStringSlice("CommentPrefixes"),
+		prefixes:            viper.GetStringSlice("Prefixes"),
+		caseInsensitive:     viper.GetBool("CaseSensitive"),
+		expiryPattern:       viper.GetString("ExpiryPattern"),
+		dateLayout:          viper.GetString("DateLayout"),
+		strict:              viper.GetBool("Strict"),
+		recursive:           viper.GetBool("Recursive"),
+		files:               viper.GetStringSlice("Files"),
+		filesExcludePattern: viper.GetStringSlice("FilesExcludePatterns"),
+		loggingLevel:        logLevel,
 	}, nil
 }

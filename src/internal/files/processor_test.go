@@ -11,6 +11,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_New(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  contracts.FilesProcessorConfig[string]
+		wantErr bool
+	}{
+		{
+			name: "fails with invalid regex",
+			config: contracts.FilesProcessorConfig[string]{
+				Recursive: true,
+				FilesExcludePatterns: []string{
+					"/[internal/",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := New(logrus.New(), tt.config)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
 func Test_ProcessFiles_echo(t *testing.T) {
 	echoProcessor := func(filepath string) (string, error) {
 		return filepath, nil
@@ -134,6 +162,38 @@ func Test_ProcessFiles_echo(t *testing.T) {
 				"testdata/sub",
 			},
 			wantErr: true,
+		},
+		{
+			name: "works with relative file exclusion",
+			config: contracts.FilesProcessorConfig[string]{
+				Processor: echoProcessor,
+				Recursive: true,
+				FilesExcludePatterns: []string{
+					"/file.c$",
+				},
+			},
+			inputs: []string{
+				"testdata/file.c",
+				"testdata",
+			},
+			want: map[string]string{
+				"testdata/sub/file2.c": "testdata/sub/file2.c",
+			},
+		},
+		{
+			name: "works with absolute file exclusion",
+			config: contracts.FilesProcessorConfig[string]{
+				Processor: echoProcessor,
+				Recursive: true,
+				FilesExcludePatterns: []string{
+					"/internal/",
+				},
+			},
+			inputs: []string{
+				"testdata/file.c",
+				"testdata",
+			},
+			want: map[string]string{},
 		},
 	}
 	for _, tt := range tests {

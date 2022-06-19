@@ -62,14 +62,15 @@ func work() (bool, error) {
 	}
 
 	processor, err := gofixit.NewFilesProcessor(log, contracts.FilesProcessorConfig[[]contracts.ParsedComment]{
-		Processor: glue,
-		Recursive: params.recursive,
+		Processor:            glue,
+		Recursive:            params.recursive,
+		FilesExcludePatterns: params.filesExcludePattern,
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed while creating processor (%w)", err)
 	}
 
-	parsed, err := processor.ProcessFiles(params.filesPattern)
+	parsed, err := processor.ProcessFiles(params.files)
 	if err != nil {
 		return false, fmt.Errorf("failed while parsing files (%w)", err)
 	}

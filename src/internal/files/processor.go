@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/LouisBrunner/gofixit/src/contracts"
 	"github.com/LouisBrunner/gofixit/src/utils"
@@ -13,13 +14,24 @@ import (
 
 type fprocessor[T any] struct {
 	contracts.FilesProcessorConfig[T]
-	logger *logrus.Logger
+	logger          *logrus.Logger
+	excludePatterns []regexp.Regexp
 }
 
 func New[T any](logger *logrus.Logger, config contracts.FilesProcessorConfig[T]) (contracts.FilesProcessor[T], error) {
+	excludePatterns := make([]regexp.Regexp, 0, len(config.FilesExcludePatterns))
+	for _, excludePattern := range config.FilesExcludePatterns {
+		re, err := regexp.Compile(excludePattern)
+		if err != nil {
+			return nil, err
+		}
+		excludePatterns = append(excludePatterns, *re)
+	}
+
 	return &fprocessor[T]{
 		FilesProcessorConfig: config,
 		logger:               logger,
+		excludePatterns:      excludePatterns,
 	}, nil
 }
 
@@ -29,6 +41,7 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 
 	extras := []string{}
 	for len(files) > 0 {
+	fileLoop:
 		for _, filename := range files {
 			absFilename, err := filepath.Abs(filename)
 			if err != nil {
@@ -36,6 +49,14 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 			}
 			if _, found := absMatches[absFilename]; found {
 				continue
+			}
+
+			for _, needle := range []string{filename, absFilename} {
+				for _, excludePattern := range me.excludePatterns {
+					if excludePattern.MatchString(needle) {
+						continue fileLoop
+					}
+				}
 			}
 
 			info, err := os.Stat(filename)

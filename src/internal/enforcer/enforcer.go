@@ -23,14 +23,14 @@ func New(logger *logrus.Logger, config contracts.EnforcerConfig) (contracts.Enfo
 func (me *enforcer) Check(comment contracts.ParsedComment) error {
 	if comment.Expiry == nil {
 		if me.Strict {
-			return fmt.Errorf("missing expiry date")
+			return fmt.Errorf("%s missing expiry date", comment.Prefix)
 		}
 		return nil
 	}
 
 	if me.Now.After(*comment.Expiry) {
 		duration := me.Now.Sub(*comment.Expiry)
-		return fmt.Errorf("now overdue for %s", durafmt.Parse(duration).LimitFirstN(2))
+		return fmt.Errorf("%s now overdue for %s", comment.Prefix, durafmt.Parse(duration).LimitFirstN(2))
 	}
 	return nil
 }

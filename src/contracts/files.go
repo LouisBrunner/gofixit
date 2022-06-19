@@ -7,7 +7,7 @@ type FilesProcessor[T any] interface {
 }
 
 type FilesProcessorConfig[T any] struct {
-	Processor      FileProcessor[T]
-	Recursive      bool
-	FallbackGoList bool
+	Processor            FileProcessor[T]
+	Recursive            bool
+	FilesExcludePatterns []string
 }
