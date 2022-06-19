@@ -8,15 +8,18 @@ import (
 
 	"github.com/LouisBrunner/gofixit/src/contracts"
 	"github.com/LouisBrunner/gofixit/src/utils"
+	"github.com/sirupsen/logrus"
 )
 
 type fprocessor[T any] struct {
 	contracts.FilesProcessorConfig[T]
+	logger *logrus.Logger
 }
 
-func New[T any](config contracts.FilesProcessorConfig[T]) (contracts.FilesProcessor[T], error) {
+func New[T any](logger *logrus.Logger, config contracts.FilesProcessorConfig[T]) (contracts.FilesProcessor[T], error) {
 	return &fprocessor[T]{
 		FilesProcessorConfig: config,
+		logger:               logger,
 	}, nil
 }
 
@@ -60,12 +63,7 @@ func (me *fprocessor[T]) ProcessFiles(files []string) (map[string]T, error) {
 				continue
 			}
 
-			if !me.FallbackGoList {
-				return nil, fmt.Errorf("no such file %s: %w", filename, err)
-			}
-
-			// TODO: find a way to be able to support ./... and such
-			panic("unimplemented")
+			return nil, fmt.Errorf("no such file %s: %w", filename, err)
 		}
 		files = extras
 		extras = []string{}

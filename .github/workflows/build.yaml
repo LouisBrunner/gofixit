@@ -21,3 +21,6 @@ jobs:
 
     - name: Build
       run: make build
+
+    - name: Check for expired TODOs
+      run: ./gofixit

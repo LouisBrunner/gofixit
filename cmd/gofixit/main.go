@@ -9,6 +9,7 @@ import (
 	gofixit "github.com/LouisBrunner/gofixit/src"
 	"github.com/LouisBrunner/gofixit/src/contracts"
 	"github.com/LouisBrunner/gofixit/src/utils"
+	"github.com/sirupsen/logrus"
 )
 
 type args struct {
@@ -20,6 +21,7 @@ type args struct {
 	strict          bool
 	recursive       bool
 	filesPattern    []string
+	loggingLevel    logrus.Level
 }
 
 func main() {
@@ -34,7 +36,7 @@ func main() {
 }
 
 func work() (bool, error) {
-	// TODO[2022-06-10]: read from CLI/env/files
+	// TODO[2022-06-20]: read from CLI/env/files
 	params := args{
 		commentPrefixes: []string{"//", "#", "/*"},
 		prefixes:        []string{"TODO", "FIXME"},
@@ -42,9 +44,14 @@ func work() (bool, error) {
 		filesPattern:    []string{"."},
 		recursive:       true,
 		dateLayout:      "2006-01-02",
+		loggingLevel:    logrus.FatalLevel,
 	}
 
-	parser, err := gofixit.NewParser(contracts.ParsingConfig{
+	log := logrus.New()
+	log.SetLevel(params.loggingLevel)
+	log.SetOutput(os.Stderr)
+
+	parser, err := gofixit.NewParser(log, contracts.ParsingConfig{
 		CommentPrefixes: params.commentPrefixes,
 		Prefixes:        params.prefixes,
 		ExpiryPattern:   params.expiryPattern,
@@ -55,7 +62,7 @@ func work() (bool, error) {
 		return false, fmt.Errorf("failed while creating parser (%w)", err)
 	}
 
-	enforcer, err := gofixit.NewEnforcer(contracts.EnforcerConfig{
+	enforcer, err := gofixit.NewEnforcer(log, contracts.EnforcerConfig{
 		Strict: params.strict,
 		Now:    time.Now(),
 	})
@@ -72,10 +79,9 @@ func work() (bool, error) {
 		return parser.Parse(string(content))
 	}
 
-	processor, err := gofixit.NewFilesProcessor(contracts.FilesProcessorConfig[[]contracts.ParsedComment]{
-		Processor:      glue,
-		Recursive:      params.recursive,
-		FallbackGoList: false, // TODO: expose?
+	processor, err := gofixit.NewFilesProcessor(log, contracts.FilesProcessorConfig[[]contracts.ParsedComment]{
+		Processor: glue,
+		Recursive: params.recursive,
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed while creating processor (%w)", err)
