@@ -23,4 +23,4 @@ The program will log all issues to stdout and return status code `1` when it fai
 ## Issues
 
  * Using date layout with variable amount of digits (e.g. `6` instead of `06`) or with letters (e.g. `Jun` instead of `06`) is currently broken
- * `./...` and Golang's package notation in general is unsupported
+ * No way to configure the utility

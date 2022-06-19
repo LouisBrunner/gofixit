@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/LouisBrunner/gofixit/src/contracts"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -137,7 +138,7 @@ func Test_ProcessFiles_echo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			processor, err := New(tt.config)
+			processor, err := New(logrus.New(), tt.config)
 			if err != nil {
 				t.Fatalf("could not create processor: %v", err)
 			}

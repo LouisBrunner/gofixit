@@ -13,7 +13,7 @@ type enforcer struct {
 	logger *logrus.Logger
 }
 
-func NewEnforcer(logger *logrus.Logger, config contracts.EnforcerConfig) (contracts.Enforcer, error) {
+func New(logger *logrus.Logger, config contracts.EnforcerConfig) (contracts.Enforcer, error) {
 	return &enforcer{
 		EnforcerConfig: config,
 		logger:         logger,

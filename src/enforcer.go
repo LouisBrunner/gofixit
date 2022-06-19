@@ -7,5 +7,5 @@ import (
 )
 
 func NewEnforcer(logger *logrus.Logger, config contracts.EnforcerConfig) (contracts.Enforcer, error) {
-	return enforcer.NewEnforcer(logger, config)
+	return enforcer.New(logger, config)
 }
