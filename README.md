@@ -14,7 +14,10 @@ go install github.com/LouisBrunner/gofixit@latest
 gofixit .
 ```
 
-The program will log all issues to stdout and return status code `1` when it failed for an internal reason or `2` if it failed because there was one or more issue.
+The program will log all issues to stdout and return status code:
+
+ * `1` if it failed because there was one or more issue
+ * `2` when it failed for an internal reason (including when using `-h` or `--help`)
 
 ## Configuration
 

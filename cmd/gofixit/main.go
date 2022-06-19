@@ -12,39 +12,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type args struct {
-	commentPrefixes []string
-	prefixes        []string
-	caseSensitive   bool
-	expiryPattern   string
-	dateLayout      string
-	strict          bool
-	recursive       bool
-	filesPattern    []string
-	loggingLevel    logrus.Level
-}
-
 func main() {
 	success, err := work()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "gofixit: %s\n", err.Error())
-		os.Exit(1)
+		os.Exit(2)
 	}
 	if !success {
-		os.Exit(2)
+		os.Exit(1)
 	}
 }
 
 func work() (bool, error) {
-	// TODO[2022-06-20]: read from CLI/env/files
-	params := args{
-		commentPrefixes: []string{"//", "#", "/*"},
-		prefixes:        []string{"TODO", "FIXME"},
-		expiryPattern:   "{{.Prefix}}(?:\\[{{.Date}}\\])?",
-		filesPattern:    []string{"."},
-		recursive:       true,
-		dateLayout:      "2006-01-02",
-		loggingLevel:    logrus.FatalLevel,
+	params, err := getArgs()
+	if err != nil {
+		return false, fmt.Errorf("failed to read configuration: %w", err)
 	}
 
 	log := logrus.New()
@@ -55,7 +37,7 @@ func work() (bool, error) {
 		CommentPrefixes: params.commentPrefixes,
 		Prefixes:        params.prefixes,
 		ExpiryPattern:   params.expiryPattern,
-		CaseSensitive:   params.caseSensitive,
+		CaseSensitive:   !params.caseInsensitive,
 		DateLayout:      params.dateLayout,
 	})
 	if err != nil {
