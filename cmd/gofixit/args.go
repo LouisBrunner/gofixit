@@ -75,7 +75,9 @@ func getArgs() (*args, error) {
 	}
 	err = viper.ReadInConfig() // Find and read the config file
 	if err != nil {
-		return nil, err
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, err
+		}
 	}
 
 	// Flags
