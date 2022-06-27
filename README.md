@@ -62,7 +62,7 @@ Settings:
  * `ExpiryPattern`: Go template used to generate a regex to match the prefix and expiry date together, careful of escaping any regex character in here (default `"{{.Prefix}}(?:\\[{{.Date}}\\])?"`), see [here](https://pkg.go.dev/text/template) for details about Go templating and [here](https://github.com/google/re2/wiki/Syntax) for details about Go regex
  * `DateLayout`: date layout format, as specified by Golang's date parsing (default `"2006-01-02"`), see [here](https://pkg.go.dev/time#Parse) for more details about format
  * `Strict`: will force all matched comments to have an expiry date
- * `Recursive`: will process directories recursively (default `true`)
+ * `NoRecursive`: disable processing directories recursively (default `false`)
  * `Files`: list of files to parse (default `[.]`)
  * `FilesExcludePatterns`: list of patterns used to exclude files or directories
  * `LoggingLevel`: logrus log level for internal debugging (default `"fatal"`)

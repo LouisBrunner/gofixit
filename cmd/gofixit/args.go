@@ -42,11 +42,16 @@ func addAllParentFoldersUntilRoot() error {
 }
 
 func addDefault[V any](name []string, value V, typ func(name string, value V, help string) *V, help string) {
+	// add default value (+ make it available to the config file)
 	configName := strings.Join(utils.MapSlice(name, strings.Title), "")
 	viper.SetDefault(configName, value)
 
+	// add flag
 	flagName := strings.Join(utils.MapSlice(name, strings.ToLower), "-")
 	typ(flagName, value, help)
+
+	// bind them
+	viper.BindPFlag(configName, pflag.Lookup(flagName))
 }
 
 func getArgs() (*args, error) {
@@ -56,7 +61,7 @@ func getArgs() (*args, error) {
 	addDefault([]string{"Expiry", "Pattern"}, "{{.Prefix}}(?:\\[{{.Date}}\\])?", pflag.String, "Go template used to generate a regex to match the prefix and expiry date together, careful of escaping any regex character in here")
 	addDefault([]string{"Files"}, []string{"."}, pflag.StringSlice, "list of files to parse")
 	addDefault([]string{"Files", "Exclude", "Patterns"}, []string{""}, pflag.StringSlice, "list of patterns used to exclude files or directories")
-	addDefault([]string{"Recursive"}, true, pflag.Bool, "will process directories recursively")
+	addDefault([]string{"No", "Recursive"}, false, pflag.Bool, "disable processing directories recursively")
 	addDefault([]string{"Strict"}, false, pflag.Bool, "will force all matched comments to have an expiry date")
 	addDefault([]string{"Date", "Layout"}, "2006-01-02", pflag.String, "date layout format, as specified by Golang's date parsing")
 	addDefault([]string{"Logging", "Level"}, "fatal", pflag.String, "logrus log level for internal debugging")
@@ -82,7 +87,6 @@ func getArgs() (*args, error) {
 
 	// Flags
 	pflag.Parse()
-	viper.BindPFlags(pflag.CommandLine)
 
 	// Parsing
 	logLevel, err := logrus.ParseLevel(viper.GetString("LoggingLevel"))
@@ -97,7 +101,7 @@ func getArgs() (*args, error) {
 		expiryPattern:       viper.GetString("ExpiryPattern"),
 		dateLayout:          viper.GetString("DateLayout"),
 		strict:              viper.GetBool("Strict"),
-		recursive:           viper.GetBool("Recursive"),
+		recursive:           !viper.GetBool("NoRecursive"),
 		files:               viper.GetStringSlice("Files"),
 		filesExcludePattern: viper.GetStringSlice("FilesExcludePatterns"),
 		loggingLevel:        logLevel,

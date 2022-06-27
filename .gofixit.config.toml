@@ -1,1 +1,1 @@
-FilesExcludePatterns = ["README.md$", "/examples/"]
+FilesExcludePatterns = ["README.md$", "/examples/", ".git"]
